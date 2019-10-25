@@ -1,0 +1,7 @@
+settings = {
+  theme = "linkedin_api",
+  log_level = "trace",
+  sitename = "Lighttouch",
+  user = "admin",
+  password = "admin",
+}
