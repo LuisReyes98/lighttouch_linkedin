@@ -1,0 +1,6 @@
+rounded
+bg-gray-100
+border
+border-black
+m-4
+p-4

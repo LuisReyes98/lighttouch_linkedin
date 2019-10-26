@@ -4,4 +4,5 @@ settings = {
   sitename = "Lighttouch",
   user = "admin",
   password = "admin",
+  api_sample = include "api_sample.scl",
 }
