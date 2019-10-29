@@ -38,8 +38,12 @@ local state = settings.state
 
 -- api access url
 local signin_linkedin_uri = 'https://www.linkedin.com/oauth/v2/authorization'
+
 -- api token request url
 local token_linkedin_uri = 'https://www.linkedin.com/oauth/v2/accessToken'
+
+-- api get user info url
+local me_linkedin_uri = 'https://api.linkedin.com/v2/me'
 
 --redirection url (this site url)
 local redirect_uri = settings.redirect_uri
@@ -51,7 +55,9 @@ if request.query.code then
     code = request.query.code
 end
 local response
+local user_response
 local token_params = {}
+
 
 local param_table = {
     {
@@ -81,12 +87,9 @@ signin_linkedin_uri = add_request_param_array(
     param_table
 )
 
-
-
 --  GET https://api.linkedin.com/v2/people/(id:{person ID})
 
 --  GET https://api.linkedin.com/v2/me
-
 
 if code then
     token_params = {
@@ -133,6 +136,22 @@ if code then
 
     log.debug(json.from_table(response.body))
 end
+
+if access_token then
+    me_linkedin_uri = add_request_param(
+        me_linkedin_uri,
+        'oauth2_access_token',
+        access_token
+    )
+
+    user_response = send_request({
+        uri=me_linkedin_uri,
+        method="get",
+    })
+
+    log.debug(jsong.from_table(user_response))
+end
+
 
 response = {
     headers = {

@@ -9,3 +9,5 @@ and
 request.path_segments[1] == "linkedin_api"
 or
 request.query.code
+or
+request.query.state
