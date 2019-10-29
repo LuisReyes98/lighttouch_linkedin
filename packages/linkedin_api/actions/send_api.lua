@@ -14,6 +14,12 @@ function add_request_param( url,name,value)
     return url
 end
 
+function add_request_param_array( url, param_array )
+    for k,param in pairs(param_array) do
+        url = add_request_param(url, param.name, param.value )
+    end
+    return url
+end
 
 -- linked in params
 
@@ -32,44 +38,50 @@ local state = settings.state
 
 -- api access url
 local signin_linkedin_uri = 'https://www.linkedin.com/oauth/v2/authorization'
+-- api token request url
+local token_linkedin_uri = 'https://www.linkedin.com/oauth/v2/accessToken'
+
 --redirection url (this site url)
 local redirect_uri = settings.redirect_uri
 
-local access_token = ''
+local access_token = false
 
-local code = ""
+local code = false
 if request.query.code then
     code = request.query.code
 end
+local response
+local token_params = {}
 
-signin_linkedin_uri = add_request_param(
+local param_table = {
+    {
+        name = 'response_type',
+        value = 'code',
+    },
+    {
+        name = 'client_id',
+        value = client_id,
+    },
+    {
+        name = 'redirect_uri',
+        value = redirect_uri,
+    },
+    {
+        name = 'state',
+        value = state,
+    },
+    {
+        name = 'scope',
+        value = scope,
+    },
+}
+
+signin_linkedin_uri = add_request_param_array(
     signin_linkedin_uri,
-    'response_type',
-    'code'
-)
-signin_linkedin_uri = add_request_param(
-    signin_linkedin_uri,
-    'client_id',
-    client_id
+    param_table
 )
 
-signin_linkedin_uri = add_request_param(
-    signin_linkedin_uri,
-    'redirect_uri',
-    redirect_uri
-)
 
-signin_linkedin_uri = add_request_param(
-    signin_linkedin_uri,
-    'state',
-    state
-)
-
-signin_linkedin_uri = add_request_param(
-    signin_linkedin_uri,
-    'scope',
-    scope
-)
 
 --  GET https://api.linkedin.com/v2/people/(id:{person ID})
 
@@ -77,15 +89,49 @@ signin_linkedin_uri = add_request_param(
 
 
 if code then
-
-
-    local response = send_request({
-        uri='https://www.linkedin.com/oauth/v2/accessToken',
-        method="POST",
-        headers={
-            ["content-type"]="application/json",
+    token_params = {
+        {
+            name = 'grant_type',
+            value = 'authorization_code',
         },
+        {
+            name = 'client_id',
+            value = client_id,
+        },
+        {
+            name = 'client_secret',
+            value = client_secret,
+        },
+        {
+            name = 'redirect_uri',
+            value = redirect_uri,
+        },
+        {
+            name = 'code',
+            value = code,
+        },
+        {
+            name = 'state',
+            value = state,
+        },
+    }
+    token_linkedin_uri = add_request_param_array(
+        token_linkedin_uri,
+        token_params
+    )
+
+    response = send_request({
+        uri=token_linkedin_uri,
+        method="post",
     })
+
+    if not response.body.error then
+        access_token = response.body.access_token
+    else
+        log.debug('LinkedIn API error: ' .. response.body.error)
+    end
+
+    log.debug(json.from_table(response.body))
 end
 
 response = {
@@ -93,14 +139,12 @@ response = {
         ["content-type"] = "text/html",
     },
     body = render("index.html", {
-        client_secret = client_secret,
-        client_id = client_id,
-        scope = scope,
-        redirect_uri = redirect_uri,
-        code = code,
+        -- client_secret = client_secret,
+        -- client_id = client_id,
+        -- scope = scope,
+        -- redirect_uri = redirect_uri,
+        -- code = code,
         signin_linkedin_uri = signin_linkedin_uri,
-        -- dev = "Under development",
-        -- api_sample = settings.api_sample.body
     })
 }
 
