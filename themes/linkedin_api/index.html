@@ -12,16 +12,20 @@
 
 
 <body>
-    <h1>Linked in api</h1>
+    <div title_container >
+        <h1 title>Linked in api</h1>
+        <a href="{{signin_linkedin_uri}}" >
+            <img src="https://content.linkedin.com/content/dam/developer/global/en_US/site/img/signin-button.png" alt="Sign in to linked in">
+        </a>
+    </div>
     <div card>
-        <p>
-            Api information
-        </p>
-        <a href="{{signin_linkedin_uri}}" ><img src="https://content.linkedin.com/content/dam/developer/global/en_US/site/img/signin-button.png" alt="Sign in to linked in"></a>
         <div>
+            <h3 subtitle> User information: </h3>
             {% if user_info %}
-                <p>Linked in User Name</p>
-                <p>{{user_info.localizedFirstName}} {{user_info.localizedLastName}} </p>
+                <p>
+                    Username: 
+                    <b>{{user_info.localizedFirstName}} {{user_info.localizedLastName}}</b>
+                </p>
             {% endif %}
         </div>
     </div>

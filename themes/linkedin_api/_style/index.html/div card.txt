@@ -2,5 +2,5 @@ rounded
 bg-gray-100
 border
 border-black
-m-4
+m-1
 p-4

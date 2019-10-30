@@ -2,32 +2,12 @@ event = ["send_linkedin"]
 priority = 3
 input_parameters = ["request"]
 
-function add_request_param( url,name,value)
-    --checking if the url has the character ? for parameters
-    if string.find(url,"?") then
-        -- if it has the ? character then add a new field with an &
-        url = url .. "&" .. name .. "=" .. value
-    else
-        -- if the string url doesn't have the ? character add it
-        url = url .. "?" .. name .. "=" .. value
-    end
-    return url
-end
 
-function add_request_param_array( url, param_array )
-    for k,param in pairs(param_array) do
-        url = add_request_param(url, param.name, param.value )
-    end
-    return url
-end
-
-
-function save_doc(fields)
-    local document_uuid = uuid.v4()
-    local store = contentdb.home
-
-    contentdb.write_file (store, document_uuid, fields, '')
-end
+require "packages.linkedin_api.api_functions.base"
+require "packages.linkedin_api.api_functions.add_request_param"
+require "packages.linkedin_api.api_functions.add_request_param_array"
+require "packages.linkedin_api.api_functions.save_doc"
+require "packages.linkedin_api.api_functions.list_documents"
 
 -- linked in params
 
@@ -59,13 +39,16 @@ local redirect_uri = settings.redirect_uri
 local access_token = false
 
 local code = false
+
 if request.query.code then
     code = request.query.code
 end
+
 local response
 local user_response = false
 local token_params = {}
 local token_file = {}
+local token_document = false
 
 local param_table = {
     {
@@ -90,7 +73,7 @@ local param_table = {
     },
 }
 
-signin_linkedin_uri = add_request_param_array(
+signin_linkedin_uri = lkn.add_request_param_array(
     signin_linkedin_uri,
     param_table
 )
@@ -126,7 +109,7 @@ if code then
             value = state,
         },
     }
-    token_linkedin_uri = add_request_param_array(
+    token_linkedin_uri = lkn.add_request_param_array(
         token_linkedin_uri,
         token_params
     )
@@ -140,12 +123,15 @@ if code then
         access_token = response.body.access_token
     else
         log.debug('LinkedIn API error: ' .. response.body.error)
+
+        -- token_document
+
     end
 
 end
 
 if access_token then
-    me_linkedin_uri = add_request_param(
+    me_linkedin_uri = lkn.add_request_param(
         me_linkedin_uri,
         'oauth2_access_token',
         access_token
@@ -157,11 +143,12 @@ if access_token then
         method="get",
     }).body
 
-    -- log.debug(jsong.from_table(user_response.body))
+    token_file['model'] = 'token'
     token_file['user_id'] = user_response.id
     token_file['access_token'] = access_token
+    token_file['code'] = code
     -- saving access token to file
-    save_doc(token_file)
+    lkn.save_doc(token_file)
 end
 
 
