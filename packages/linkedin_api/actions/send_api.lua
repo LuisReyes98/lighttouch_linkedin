@@ -21,6 +21,14 @@ function add_request_param_array( url, param_array )
     return url
 end
 
+
+function save_doc(fields)
+    local document_uuid = uuid.v4()
+    local store = contentdb.home
+
+    contentdb.write_file (store, document_uuid, fields, '')
+end
+
 -- linked in params
 
 -- linked app api client_secret
@@ -55,9 +63,9 @@ if request.query.code then
     code = request.query.code
 end
 local response
-local user_response
+local user_response = false
 local token_params = {}
-
+local token_file = {}
 
 local param_table = {
     {
@@ -134,7 +142,6 @@ if code then
         log.debug('LinkedIn API error: ' .. response.body.error)
     end
 
-    log.debug(json.from_table(response.body))
 end
 
 if access_token then
@@ -144,12 +151,17 @@ if access_token then
         access_token
     )
 
+    -- getting user info
     user_response = send_request({
         uri=me_linkedin_uri,
         method="get",
-    })
+    }).body
 
-    log.debug(jsong.from_table(user_response))
+    -- log.debug(jsong.from_table(user_response.body))
+    token_file['user_id'] = user_response.id
+    token_file['access_token'] = access_token
+    -- saving access token to file
+    save_doc(token_file)
 end
 
 
@@ -158,11 +170,7 @@ response = {
         ["content-type"] = "text/html",
     },
     body = render("index.html", {
-        -- client_secret = client_secret,
-        -- client_id = client_id,
-        -- scope = scope,
-        -- redirect_uri = redirect_uri,
-        -- code = code,
+        user_info = user_response,
         signin_linkedin_uri = signin_linkedin_uri,
     })
 }

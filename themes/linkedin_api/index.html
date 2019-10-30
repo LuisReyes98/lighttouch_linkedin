@@ -18,9 +18,12 @@
             Api information
         </p>
         <a href="{{signin_linkedin_uri}}" ><img src="https://content.linkedin.com/content/dam/developer/global/en_US/site/img/signin-button.png" alt="Sign in to linked in"></a>
-        <p>
-            First Name: {# {{api_sample.localizedFirstName}}#}
-        </p>
+        <div>
+            {% if user_info %}
+                <p>Linked in User Name</p>
+                <p>{{user_info.localizedFirstName}} {{user_info.localizedLastName}} </p>
+            {% endif %}
+        </div>
     </div>
 
 </body>
