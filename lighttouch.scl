@@ -4,5 +4,9 @@ settings = {
   sitename = "Lighttouch",
   user = "admin",
   password = "admin",
-  api_sample = include "api_sample.scl",
+  client_id = "xxxxxxx",
+  client_secret = "xxxxxxx",
+  scope = "r_liteprofile r_basicprofile r_emailaddress w_member_social",
+  redirect_uri = "http://localhost_ip:3000/linkedin_api",
+  state = "randomStringToValidateTheApiResponse",
 }
