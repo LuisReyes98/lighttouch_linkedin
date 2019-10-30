@@ -124,10 +124,15 @@ if code then
     else
         log.debug('LinkedIn API error: ' .. response.body.error)
 
-        -- token_document
-
+        token_document = lkn.list_documents(
+            'token',
+            { code = code },
+            false,
+            true
+        )
+        access_token = token_document.documents[1].access_token
+        log.debug("Getting access token from document")
     end
-
 end
 
 if access_token then
